@@ -1,4 +1,5 @@
 'use client'
+
 import AuthForm from "@/components/AuthForm/AuthForm";
 import { useState } from "react";
 
@@ -29,7 +30,7 @@ export default function Auth() {
 
         <div className="items-center min-h-screen">
             <AuthForm stateAuth={formState}/>
-        </div>      
+        </div> 
       </div>
     </>
     );

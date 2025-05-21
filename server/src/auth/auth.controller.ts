@@ -2,6 +2,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res } from '@ne
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
 import { AuthDto } from './dto/auth.dto';
+import { GoogleDto } from './dto/google.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -13,10 +14,22 @@ export class AuthController {
       return await this.authService.register(res, dto);
     }
 
+    @HttpCode(HttpStatus.CREATED)
+    @Post('register/google')
+    async registerGoogle (@Res({passthrough: true}) res: Response, @Body() dto: GoogleDto){
+      return await this.authService.registerGoogle(res, dto);
+    }
+
     @HttpCode(HttpStatus.OK)
     @Post('login')
     async login (@Res({passthrough: true}) res: Response, @Body() dto: AuthDto){
       return await this.authService.login(res, dto);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Post('login/google')
+    async loginGoogle (@Res({passthrough: true}) res: Response, @Body() dto: GoogleDto){
+      return await this.authService.loginGoogle(res, dto);
     }
 
     @HttpCode(HttpStatus.OK)

@@ -1,6 +1,10 @@
-import { useState } from "react"
+'use client'
+
+import { useEffect, useState } from "react"
 import { useRouter } from 'next/navigation';
 import axios from '../../utils/axios'
+import { signIn, signOut, useSession } from "next-auth/react";
+
 
 type StateProps = {
     stateAuth: boolean
@@ -12,6 +16,9 @@ export default function AuthForm({stateAuth}:StateProps) {
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const router = useRouter();
+
+    const { data: session } = useSession();
+    
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -83,6 +90,16 @@ export default function AuthForm({stateAuth}:StateProps) {
         }
     };
 
+    
+    useEffect(() => {
+    if (session?.user?.email) {
+      axios.post("/user/register/google", {
+        email: session.user.email,
+        provider: "google",
+      });
+    }
+  }, [session]);
+
     return(
             <div className="max-w-sm mx-auto p-6 border border-gray-300 rounded-lg shadow-lg">
                 <h1 className="text-2xl font-semibold text-center mb-6">
@@ -126,6 +143,23 @@ export default function AuthForm({stateAuth}:StateProps) {
                     {message && <p className="text-green-500 text-sm text-center">{message}</p>}
                     </div>
                 </form>
+                {!session ? (
+                    <>
+                        <h1
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                        >Або через Google</h1>
+                        <button 
+                        className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onClick={() => signIn("google")}>Увійти через Google</button>
+                    </>
+                    ) : (
+                    <>
+                        <h1>Привіт, {session.user?.name}!</h1>
+                        <button
+                        className="w-50 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onClick={() => signOut()}>Вийти</button>
+                    </>
+                )}
         </div>
     )
 }

@@ -7,6 +7,7 @@ import { isDev } from 'src/utils/id-dev.utils';
 import { hash, verify } from 'argon2';
 import { JwtPayload } from './interfaces/jwt.interface';
 import { Request, Response } from 'express';
+import { GoogleDto } from './dto/google.dto';
 
 @Injectable()
 export class AuthService {
@@ -47,6 +48,27 @@ export class AuthService {
         return this.auth(res, user.id)
     }
 
+    async registerGoogle(res: Response, dto: GoogleDto){
+        const { email, provider } = dto
+        const existUser = await this.prismaService.users.findUnique({
+            where: {
+                email,
+            }
+        })
+        if(existUser){
+            throw new ConflictException("Такий користувач вже існує")
+        }
+
+        const user = await this.prismaService.users.create({
+            data: {
+                email,
+                provider
+            }
+        })
+
+        return this.auth(res, user.id)
+    }
+
     async login(res: Response, dto: AuthDto){
         const {email, password} = dto
 
@@ -64,10 +86,32 @@ export class AuthService {
             throw new NotFoundException("Користувача не знайдено 1")
         }
 
+        if(!user.password){
+            throw new NotFoundException("Пароля не знайдено")
+        }
         const isValidPassword = await verify(user.password, password);
 
         if(!isValidPassword){
             throw new NotFoundException("Користувача не знайдено 2")
+        }
+
+        return this.auth(res, user.id)
+    }
+
+    async loginGoogle(res: Response, dto: GoogleDto){
+        const {email} = dto
+
+        const user = await this.prismaService.users.findUnique({
+            where: {
+                email,
+            },
+            select: {
+                id: true,
+            }
+        })
+
+        if(!user){
+            throw new NotFoundException("Користувача не знайдено 1")
         }
 
         return this.auth(res, user.id)
@@ -145,5 +189,4 @@ export class AuthService {
             sameSite: isDev(this.configService) ? 'none' : 'lax'
         })
     }
-
 }
