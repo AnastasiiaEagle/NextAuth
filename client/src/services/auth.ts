@@ -9,7 +9,7 @@ type authGoogleProps = {
     email: string,
     provider: string
 }
-
+//Потрібно виносити ще й трай кетч
 export const authLogin = async(userData: authProps) => {
     const res = await axios.post('/auth/login', userData, 
     {
@@ -19,11 +19,14 @@ export const authLogin = async(userData: authProps) => {
 }
 
 export const authRegister = async(userData: authProps) => {
+
     const res = await axios.post('/auth/register', userData, 
             {
                 withCredentials: true
             })
     return res
+
+    
 }
 
 export const authRegisterGoogle = async(userData: authGoogleProps) => {
