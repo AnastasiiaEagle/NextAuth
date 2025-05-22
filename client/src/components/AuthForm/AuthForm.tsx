@@ -91,14 +91,14 @@ export default function AuthForm({stateAuth}:StateProps) {
     };
 
     
-    useEffect(() => {
-    if (session?.user?.email) {
-      axios.post("/user/register/google", {
-        email: session.user.email,
-        provider: "google",
-      });
-    }
-  }, [session]);
+//     useEffect(() => {
+//     if (session?.user?.email) {
+//       axios.post("/user/register/google", {
+//         email: session.user.email,
+//         provider: "google",
+//       });
+//     }
+//   }, [session]);
 
     return(
             <div className="max-w-sm mx-auto p-6 border border-gray-300 rounded-lg shadow-lg">
