@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from 'next/navigation';
-import axios from '../../utils/axios'
 import { signIn, signOut, useSession } from "next-auth/react";
+import { authLogin, authLoginGoogle, authRegister, authRegisterGoogle } from "@/services/auth";
 
 
 type StateProps = {
@@ -32,11 +32,7 @@ export default function AuthForm({stateAuth}:StateProps) {
         console.log(userData)
 
         try {
-            const res = await axios.post('/auth/login', userData, 
-            {
-                withCredentials: true
-            }
-            );
+            const res = await authLogin(userData)
 
             if (res.data.accessToken) {
                 localStorage.setItem('accessToken', res.data.accessToken);
@@ -67,11 +63,7 @@ export default function AuthForm({stateAuth}:StateProps) {
         };
 
         try {
-            const res = await axios.post('/auth/register', userData, 
-            {
-                withCredentials: true
-            }
-            );
+            const res = await authRegister(userData)
 
             if (res.data.accessToken) {
                 localStorage.setItem('accessToken', res.data.accessToken);
@@ -90,15 +82,32 @@ export default function AuthForm({stateAuth}:StateProps) {
         }
     };
 
-    
-//     useEffect(() => {
-//     if (session?.user?.email) {
-//       axios.post("/user/register/google", {
-//         email: session.user.email,
-//         provider: "google",
-//       });
-//     }
-//   }, [session]);
+    const handleGoogleAuth = async () => {
+        if (!session?.user?.email) return
+
+        const userData = {
+                email: session.user.email,
+                provider: "google",
+            }
+
+        try {
+            const res = await authRegisterGoogle(userData)
+
+            if (res.data?.status === "alreadyExists") {
+                await authLoginGoogle(userData)
+            }
+        } catch (error: any) {
+            console.error("Google auth error:", error)
+            if (error.response?.status === 409) {
+                try {
+                    await authLoginGoogle(userData)
+                } catch (loginErr) {
+                    console.error("Login failed", loginErr)
+                }
+            }
+        }
+    }
+
 
     return(
             <div className="max-w-sm mx-auto p-6 border border-gray-300 rounded-lg shadow-lg">
@@ -150,7 +159,10 @@ export default function AuthForm({stateAuth}:StateProps) {
                         >Або через Google</h1>
                         <button 
                         className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        onClick={() => signIn("google")}>Увійти через Google</button>
+                        onClick={() => {
+                            signIn("google")
+                            handleGoogleAuth()
+                        }}>Увійти через Google</button>
                     </>
                     ) : (
                     <>

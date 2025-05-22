@@ -65,6 +65,7 @@ export class AuthService {
                 provider
             }
         })
+        console.log("Користувача зареєстровано")
 
         return this.auth(res, user.id)
     }
@@ -94,6 +95,9 @@ export class AuthService {
         if(!isValidPassword){
             throw new NotFoundException("Користувача не знайдено 2")
         }
+
+        console.log("Користувача авторизовано")
+
 
         return this.auth(res, user.id)
     }
